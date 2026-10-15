@@ -1,0 +1,6 @@
+# 运行环境（使用由 conda Python 3.13 派生的项目 venv：.venv）
+pillow>=10.0
+imageio-ffmpeg>=0.5.0
+
+# 测试
+pytest>=8.0
