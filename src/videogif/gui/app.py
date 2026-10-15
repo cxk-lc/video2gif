@@ -622,10 +622,11 @@ class GifApp:
                 self._set_status("无法打开所在文件夹。", error=True)
 
     def _dispose_result(self) -> None:
+        # 先释放预览对文件句柄的占用，再删临时目录（Windows 文件锁语义）
+        self.preview.clear()
         if self._result is not None:
             GifConverter.cleanup(self._result.work_dir)
             self._result = None
-        self.preview.clear()
         self.preview_info_var.set("")
 
     # ══════════════════ 事件循环与退出 ══════════════════

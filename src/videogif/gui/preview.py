@@ -85,6 +85,12 @@ class GifPreview(ttk.Frame):
                 total_ms += d
                 small = frame.convert("RGBA").resize((tw, th), Image.Resampling.LANCZOS)
                 self._frames.append(ImageTk.PhotoImage(small))
+            # 帧已全部转换为 PhotoImage 副本，可安全释放文件句柄
+            # （Windows 下不释放会导致临时 GIF 无法删除）
+            try:
+                im.close()
+            except Exception:
+                pass
 
         self._idx = 0
         self._show_current()
@@ -111,6 +117,11 @@ class GifPreview(ttk.Frame):
         self.stop()
         self._frames = []
         self._durations = []
+        if self._img_obj is not None:
+            try:
+                self._img_obj.close()  # 释放文件句柄（Windows 下不释放会导致文件无法删除）
+            except Exception:
+                pass
         self._img_obj = None
         self._cur_photo = None
         self._lazy = False

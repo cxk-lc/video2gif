@@ -227,7 +227,14 @@ class GifConverter:
 
     @staticmethod
     def cleanup(work_dir: Path | str | None) -> None:
-        """清理转换工作目录（临时 GIF / 调色板等）。"""
+        """清理转换工作目录（临时 GIF / 调色板等）。
+
+        Windows 下文件句柄未完全释放时删除可能短暂失败，此处带一次重试兜底。
+        """
         if not work_dir:
             return
-        shutil.rmtree(str(work_dir), ignore_errors=True)
+        target = Path(work_dir)
+        shutil.rmtree(str(target), ignore_errors=True)
+        if target.exists():
+            time.sleep(0.2)
+            shutil.rmtree(str(target), ignore_errors=True)
