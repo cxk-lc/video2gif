@@ -107,7 +107,7 @@ class ErrorDialog(tk.Toplevel):
         frame.pack(fill="both", expand=True)
         ttk.Label(frame, text=title, font=("", 11, "bold")).pack(anchor="w")
 
-        text = tk.Text(frame, wrap="word", width=78, height=14)
+        text = tk.Text(frame, wrap="word", width=78, height=self._estimate_text_height(message))
         text.pack(fill="both", expand=True, pady=(8, 8))
         text.insert("1.0", message)
         text.configure(state="disabled")
@@ -122,6 +122,14 @@ class ErrorDialog(tk.Toplevel):
         self._center_over(master)
         self.grab_set()
         self.focus_set()
+
+    @staticmethod
+    def _estimate_text_height(message: str, per_line: int = 36) -> int:
+        """按消息长度粗略估算文本框高度（限 5–18 行），避免短消息撑出大空白。"""
+        lines = 0
+        for raw in message.splitlines() or [""]:
+            lines += max(1, (len(raw) + per_line - 1) // per_line)
+        return min(18, max(5, lines + 1))
 
     def _center_over(self, master: tk.Misc) -> None:
         try:
@@ -292,9 +300,12 @@ class GifApp:
         sec5 = ttk.LabelFrame(main, text=" ③ 预览 ", padding=(10, 8))
         sec5.grid(row=4, column=0, sticky="nsew", pady=(0, 6))
         main.rowconfigure(4, weight=1)
-        self.preview = GifPreview(sec5, max_w=620, max_h=300)
+        # 先 pack 底部信息行，再让预览区填充剩余空间：避免空间不足时信息行被裁剪
+        ttk.Label(sec5, textvariable=self.preview_info_var, foreground=_DIM_FG).pack(
+            side="bottom", anchor="w", pady=(6, 0)
+        )
+        self.preview = GifPreview(sec5, max_w=680, max_h=280)
         self.preview.pack(fill="both", expand=True)
-        ttk.Label(sec5, textvariable=self.preview_info_var, foreground=_DIM_FG).pack(anchor="w", pady=(6, 0))
 
         # 状态栏
         self.lbl_status = ttk.Label(main, textvariable=self.status_var, anchor="w")

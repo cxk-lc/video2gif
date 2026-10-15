@@ -65,6 +65,7 @@ def run_selftest() -> bool:
         checks.append(
             ("转换并校验 GIF", ok, f"size={im.size} frames={frames} total={total_ms}ms loop={im.info.get('loop')}")
         )
+        im.close()  # 释放文件句柄，确保后续可清理临时目录（Windows 文件锁语义）
         conv.cleanup(result.work_dir)
     except Exception as exc:  # noqa: BLE001 - 自检需要把一切异常变为 FAIL
         checks.append(("自检执行", False, f"{type(exc).__name__}: {exc}"))
