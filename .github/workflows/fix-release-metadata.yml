@@ -1,0 +1,50 @@
+name: fix-release-metadata
+
+# 一次性/按需维护工具（幂等）：
+#  1) 修复被 GitHub 剥离非 ASCII 字符的历史资产名（曾把中文 exe 名清洗成 GIF.exe）；
+#  2) 统一 Release 标题为「视频转GIF动图 <tag>」格式（与 build-release.yml 的命名约定一致）。
+# 触发：本文件路径变更时自动运行；或手动 workflow_dispatch。
+
+on:
+  push:
+    paths:
+      - ".github/workflows/fix-release-metadata.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fix-metadata:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Rename stripped legacy asset (if any)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          REPO="${GITHUB_REPOSITORY}"
+          ASSET_ID=$(gh api "repos/${REPO}/releases/tags/v0.1.1" --jq '.assets[] | select(.name=="GIF.exe") | .id' || true)
+          if [ -n "$ASSET_ID" ]; then
+            gh api -X PATCH "repos/${REPO}/releases/assets/${ASSET_ID}" -f name="VideoGif-v0.1.1-win64.exe"
+            echo "renamed asset ${ASSET_ID}"
+          else
+            echo "no legacy asset to rename"
+          fi
+
+      - name: Normalize release titles to 「视频转GIF动图 <tag>」
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          REPO="${GITHUB_REPOSITORY}"
+          gh api "repos/${REPO}/releases" --paginate --jq '.[] | [.id, .tag_name, (.name // "")] | @tsv' |
+          while IFS=$'\t' read -r id tag name; do
+            want="视频转GIF动图 ${tag}"
+            if [ "$name" != "$want" ]; then
+              gh api -X PATCH "repos/${REPO}/releases/${id}" -f name="$want" > /dev/null
+              echo "title updated: '${name}' -> '${want}'"
+            else
+              echo "title ok: ${want}"
+            fi
+          done

@@ -51,7 +51,8 @@ jobs:
           # 直接上传中文名会得到被清洗过的残缺资产名
           cp "dist/视频转GIF动图.exe" "dist/VideoGif-${TAG}-win64.exe"
           ASSET="dist/VideoGif-${TAG}-win64.exe"
-          TITLE="视频转GIF动图 ${TAG} · Windows 免环境版"
+          # Release 标题格式（约定）：视频转GIF动图 + 空格 + 版本号
+          TITLE="视频转GIF动图 ${TAG}"
           NOTES="docs/release-notes-${TAG}.md"
           if [ -f "$NOTES" ]; then
             gh release create "$TAG" "$ASSET" --title "$TITLE" --notes-file "$NOTES"
