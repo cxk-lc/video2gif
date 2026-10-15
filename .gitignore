@@ -19,3 +19,11 @@ Thumbs.db
 
 # 日志
 *.log
+
+# 内置 ffmpeg 二进制（体积大，不入库；来源与获取方式见 tools/ffmpeg/README.txt）
+tools/ffmpeg/*.exe
+
+# 测试与临时产物
+tests/_artifacts/
+*.pyc
+__pycache__/
