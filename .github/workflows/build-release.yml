@@ -47,7 +47,10 @@ jobs:
         run: |
           set -euo pipefail
           TAG="${GITHUB_REF_NAME}"
-          ASSET="dist/视频转GIF动图.exe#VideoGif-${TAG}-win64.exe"
+          # 先复制为 ASCII 文件名再上传：GitHub 上传接口会剥离非 ASCII 字符，
+          # 直接上传中文名会得到被清洗过的残缺资产名
+          cp "dist/视频转GIF动图.exe" "dist/VideoGif-${TAG}-win64.exe"
+          ASSET="dist/VideoGif-${TAG}-win64.exe"
           TITLE="视频转GIF动图 ${TAG} · Windows 免环境版"
           NOTES="docs/release-notes-${TAG}.md"
           if [ -f "$NOTES" ]; then
