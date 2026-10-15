@@ -6,7 +6,15 @@
 
 ---
 
-## 快速开始
+## 下载免环境版（推荐给普通使用）
+
+到 [**Releases 页面**](https://github.com/cxk-lc/video2gif/releases/latest) 下载 `VideoGif-*-win64.exe`，**双击即用**：无需安装 Python 与 ffmpeg；单文件、全程本地处理、不联网。
+
+> 首次启动需解压自身（约 2–5 秒）属正常；如杀毒软件误报请添加信任（PyInstaller 打包程序常见误报）。
+
+---
+
+## 快速开始（从源码运行）
 
 **本机（已配置好环境）**：双击根目录的 `启动.bat` 即可。
 
@@ -90,10 +98,13 @@ python -m venv .venv
 ## 技术说明
 
 - **转换引擎**：内置 ffmpeg 7.1（约 87 MB，不纳入 Git），来源与许可见 `tools/ffmpeg/README.txt`；采用两遍调色板（palettegen + paletteuse）保证 GIF 画质。
+- **打包免环境 exe**：`.venv\Scripts\python.exe tools\build_exe.py` → 产物 `dist\视频转GIF动图.exe`（PyInstaller 单文件，内嵌 ffmpeg 与图标）。
+- **自动发布**：推送 `v*` 标签后，GitHub Actions（`.github/workflows/build-release.yml`）自动构建、对 exe 跑端到端自检、并发布 Release。
 - **目录结构**：
   - `src/videogif/core/`：转换核心（探测 / 参数 / 转换 / 错误映射，无 GUI 依赖）
   - `src/videogif/gui/`：tkinter 界面与 GIF 预览
   - `src/cli.py`、`src/main.py`：命令行与 GUI 入口
-  - `tests/`：pytest 测试（自动合成测试视频，不依赖外部素材）
-  - `docs/`：产品设计文档与技术方案文档
+  - `tools/`：ffmpeg 获取 / 图标生成 / 打包 / 构建脚本
+  - `assets/`：应用图标；`tests/`：pytest 测试（自动合成测试视频，不依赖外部素材）
+  - `docs/`：产品设计 / 技术方案 / 验收清单；`.github/workflows/`：自动构建发布
 - **隐私**：全程本地处理，不联网、不上传任何数据。

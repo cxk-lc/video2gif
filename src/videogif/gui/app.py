@@ -16,6 +16,7 @@ import tkinter as tk
 from pathlib import Path
 from tkinter import filedialog, messagebox, ttk
 
+from .. import __version__
 from ..core.converter import ConversionResult, GifConverter
 from ..core.errors import ConversionCancelled, VideoToolError
 from ..core.params import (
@@ -37,6 +38,7 @@ from ..core.params import (
     validate_params,
 )
 from ..core.probe import VideoInfo, probe_video
+from ..paths import asset_path
 from .preview import GifPreview
 
 VIDEO_FILE_TYPES = [
@@ -156,7 +158,7 @@ class GifApp:
 
     def __init__(self, root: tk.Tk) -> None:
         self.root = root
-        root.title("视频转 GIF 动图")
+        root.title(f"视频转 GIF 动图 v{__version__}")
         root.minsize(880, 700)
 
         # ── 状态 ──────────────────────────────────────────────
@@ -674,11 +676,23 @@ class GifApp:
         self.root.destroy()
 
 
+def _setup_window_icon(root: tk.Tk) -> None:
+    """设置窗口/任务栏图标（资源缺失时静默跳过）。"""
+    icon = asset_path("app.ico")
+    if icon is None:
+        return
+    try:
+        root.iconbitmap(default=str(icon))
+    except Exception:
+        pass
+
+
 def run_app(initial_file: str | None = None) -> int:
     """创建并运行主窗口。"""
     root = tk.Tk()
     _setup_dpi_scaling(root)
     _setup_fonts(root)
+    _setup_window_icon(root)
     app = GifApp(root)
     if initial_file:
         root.after(150, lambda: app.load_file(initial_file))

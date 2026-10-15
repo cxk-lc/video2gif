@@ -20,11 +20,17 @@ if str(SRC_DIR) not in sys.path:
 
 
 def _ensure_std_streams() -> None:
-    """pythonw 启动时 stdout/stderr 为 None，兜底到 devnull，避免 print 崩溃。"""
-    if sys.stdout is None:
-        sys.stdout = open(os.devnull, "w", encoding="utf-8")
-    if sys.stderr is None:
-        sys.stderr = open(os.devnull, "w", encoding="utf-8")
+    """pythonw / 冻结态下 stdout/stderr 可能为 None，或为 GBK 编码管道（PyInstaller
+    隔离模式会忽略 PYTHONUTF8），统一兜底为 UTF-8，避免 print 崩溃。"""
+    for name in ("stdout", "stderr"):
+        stream = getattr(sys, name, None)
+        if stream is None:
+            setattr(sys, name, open(os.devnull, "w", encoding="utf-8", errors="replace"))
+            continue
+        try:
+            stream.reconfigure(encoding="utf-8", errors="replace")
+        except Exception:
+            pass
 
 
 def _enable_dpi_awareness() -> None:
@@ -50,9 +56,15 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     if args.selftest:
-        from videogif.selftest import run_selftest
+        try:
+            from videogif.selftest import run_selftest
 
-        return 0 if run_selftest() else 1
+            return 0 if run_selftest() else 1
+        except Exception:
+            import traceback
+
+            traceback.print_exc()
+            return 1
 
     _enable_dpi_awareness()
     from videogif.gui.app import run_app
