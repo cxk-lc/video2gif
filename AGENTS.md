@@ -11,12 +11,15 @@
 ## 项目信息
 
 - 项目名称：视频转GIF动图
-- 技术栈：（技术设计阶段填写）
-- 运行命令：（如 npm start，填写后更新）
-- 测试命令：（如 npm test，填写后更新）
+- 技术栈：Python 3.13（conda 派生 venv，`.venv/`）+ tkinter/ttk + ffmpeg 内置二进制（`tools/ffmpeg/`）+ Pillow；测试用 pytest
+- 运行命令：双击 `启动.bat`；或 `.venv\Scripts\python.exe src\main.py`（GUI）；无头转换 `.venv\Scripts\python.exe src\cli.py convert --input <视频> --start <秒> --end <秒> --out <out.gif>`
+- 测试命令：`.venv\Scripts\python.exe -m pytest tests/ -v`
 - 目录说明：
   - `docs/`：产品设计文档（product-design.md）与技术方案文档（tech-design.md）
-  - 其他目录：（按需补充）
+  - `src/core/`：转换核心（无 GUI 依赖，可独立测试）
+  - `src/gui/`：tkinter 界面与 GIF 预览
+  - `tools/ffmpeg/`：内置 ffmpeg 二进制（不入 Git，获取方式见 README）
+  - `tests/`：pytest 测试（用 ffmpeg lavfi 合成测试视频，不依赖外部素材）
 
 ## 边界约定
 
